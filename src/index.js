@@ -1,5 +1,7 @@
 const express = require('express');
 const { readTalkerData, readTalkerId, generateToken } = require('./utils/fsUtil');
+const { validationEmail } = require('./middlewares/validationEmail');
+const { validationPassword } = require('./middlewares/validationPassword');
 
 const app = express();
 app.use(express.json());
@@ -30,7 +32,8 @@ app.get('/talker/:id', async (req, res) => {
   return res.status(HTTP_OK_STATUS).json(talkerId);
 });
 
-app.post('/login', async (req, res) => res.status(HTTP_OK_STATUS).json({ token: generateToken() }));
+app.post('/login', validationPassword, validationEmail, (_req, res) => 
+res.status(HTTP_OK_STATUS).json({ token: generateToken() }));
 
 app.listen(PORT, () => {
   console.log('Online');
