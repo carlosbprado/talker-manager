@@ -1,6 +1,6 @@
+const regex = /^\S+@\S+\.\S+$/;
 const validationLogin = (req, res, next) => {
     const { password, email } = req.body;
-    const regex = /^\S+@\S+\.\S+$/;
     if (!email) {
       return res.status(400).json({ message: 'O campo "email" é obrigatório' });
     }
