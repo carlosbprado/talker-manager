@@ -1,7 +1,11 @@
 const express = require('express');
 const { readTalkerData, readTalkerId, generateToken } = require('./utils/fsUtil');
-const { validationEmail } = require('./middlewares/validationEmail');
-const { validationPassword } = require('./middlewares/validationPassword');
+const { validationLogin } = require('./middlewares/validationLogin');
+
+const { 
+  validationAuth,
+  validationName,
+} = require('./middlewares/validationTalker');
 
 const app = express();
 app.use(express.json());
@@ -32,8 +36,15 @@ app.get('/talker/:id', async (req, res) => {
   return res.status(HTTP_OK_STATUS).json(talkerId);
 });
 
-app.post('/login', validationPassword, validationEmail, (_req, res) => 
-res.status(HTTP_OK_STATUS).json({ token: generateToken() }));
+app.post('/login', validationLogin, (_req, res) => {
+  const token = generateToken();
+  return res.status(HTTP_OK_STATUS).json({ token });
+});
+
+app.post('/talker', validationAuth, validationName, async (_req, res) => 
+res.status(HTTP_OK_STATUS).json(
+  { message: 'Pessoa palestrante adicionada com sucesso' },
+));
 
 app.listen(PORT, () => {
   console.log('Online');
