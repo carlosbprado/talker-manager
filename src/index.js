@@ -1,15 +1,19 @@
 const express = require('express');
-const { readTalkerData, readTalkerId, generateToken } = require('./utils/fsUtil');
+const { readTalkerData, readTalkerId, generateToken, writeNewtalker } = require('./utils/fsUtil');
+// const { writeTalker } = require('./utils/writeFile');
 const { validationLogin } = require('./middlewares/validationLogin');
-
-const { 
-  validationAuth,
-  validationName,
+const { isAuth } = require('./middlewares/validationAuth');
+const { validationName,
+  validationAge,
+  validationTalk,
+  validationwatchedAt,
+  validationRate,
 } = require('./middlewares/validationTalker');
 
 const app = express();
 app.use(express.json());
 
+// const TALKER_DATA_PATH = '../talker.json';
 const HTTP_NOT_FOUND = 404;
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
@@ -41,10 +45,27 @@ app.post('/login', validationLogin, (_req, res) => {
   return res.status(HTTP_OK_STATUS).json({ token });
 });
 
-app.post('/talker', validationAuth, validationName, async (_req, res) => 
-res.status(HTTP_OK_STATUS).json(
-  { message: 'Pessoa palestrante adicionada com sucesso' },
-));
+app.post('/talker',
+isAuth,
+validationName,
+validationAge,
+validationTalk,
+validationwatchedAt,
+validationRate,
+async (req, res) => {
+  try {
+    const { body } = req;
+    const talkers = await readTalkerData();
+    const id = talkers.length + 1;
+    const newTalker = { id, ...body };
+    await writeNewtalker(newTalker);
+    return res.status(201).json(
+      newTalker,
+    );
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 app.listen(PORT, () => {
   console.log('Online');
