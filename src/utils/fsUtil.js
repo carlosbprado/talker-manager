@@ -34,7 +34,15 @@ async function writeNewtalker(newTalker) {
         console.error(error);
     }
 }
-
+async function deleteTalker(newTalker) {
+    try {
+        const oldTalkers = await readTalkerData();
+        const allTalkers = JSON.stringify([oldTalkers, newTalker]);
+        await fs.writeFile(path.resolve(__dirname, TALKER_DATA_PATH), allTalkers);
+    } catch (error) {
+        console.error(error);
+    }
+}
 const generateToken = () => 
     crypto.randomBytes(8).toString('hex');
 
@@ -43,4 +51,5 @@ module.exports = {
     readTalkerData,
     generateToken,
     writeNewtalker,
+    deleteTalker,
 };

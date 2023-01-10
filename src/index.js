@@ -1,6 +1,6 @@
 const express = require('express');
-const { readTalkerData, readTalkerId, generateToken, writeNewtalker } = require('./utils/fsUtil');
-// const { writeTalker } = require('./utils/writeFile');
+const { readTalkerData, readTalkerId, generateToken, writeNewtalker,
+  deleteTalker } = require('./utils/fsUtil');
 const { validationLogin } = require('./middlewares/validationLogin');
 const { isAuth } = require('./middlewares/validationAuth');
 const { validationName,
@@ -65,6 +65,37 @@ async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+});
+
+app.put('/talker/:id',
+isAuth,
+validationName,
+validationAge,
+validationTalk,
+validationwatchedAt,
+validationRate,
+async (req, res) => {
+try {
+  const { id } = req.params;
+  const { name, age, talk: { watchedAt, rate } } = req.body;
+  const talkers = await readTalkerData();
+  const updateTalker = talkers.find((t) => t.id === Number(id));
+  updateTalker.id = Number(id);
+  updateTalker.name = name;
+  updateTalker.age = age;
+  updateTalker.talk.watchedAt = watchedAt;
+  updateTalker.talk.rate = rate;
+  await writeNewtalker(updateTalker);
+  res.status(200).json(updateTalker);
+} catch (error) {
+  console.log(error);
+}
+});
+
+app.delete('/talker/:id', isAuth, (req, res) => {
+  const { id } = req.params;
+  deleteTalker(id);
+  return res.status(204).end();
 });
 
 app.listen(PORT, () => {
